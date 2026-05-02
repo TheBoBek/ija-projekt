@@ -4,11 +4,12 @@ package ija.game;
  * Unit type with display name and move points.
  */
 public enum UnitType {
-    TANK("Tank", 6, true, 1, 1, false, true),
-    INFANTRY("Infantry", 3, false, 1, 1, true, true),
-    ARTILLERY("Artillery", 5, true, 2, 3, false, false);
+    TANK("Tank", 7000, 6, true, 1, 1, false, true),
+    INFANTRY("Infantry", 1000, 3, false, 1, 1, true, true),
+    ARTILLERY("Artillery", 6000, 5, true, 2, 3, false, false);
 
     private final String displayName;
+    private final int cost;
     private final int movePoints;
     private final boolean vehicle;
     private final int minAttackRange;
@@ -18,6 +19,7 @@ public enum UnitType {
 
     UnitType(
         String displayName,
+        int cost,
         int movePoints,
         boolean vehicle,
         int minAttackRange,
@@ -26,6 +28,7 @@ public enum UnitType {
         boolean canMoveAndShoot
     ) {
         this.displayName = displayName;
+        this.cost = cost;
         this.movePoints = movePoints;
         this.vehicle = vehicle;
         this.minAttackRange = minAttackRange;
@@ -39,7 +42,6 @@ public enum UnitType {
             return null;
         }
 
-        // Accept values like "Tank", "TANK", or "tank".
         String normalized = normalize(name);
         for (UnitType type : values()) {
             if (normalize(type.name()).equals(normalized)) {
@@ -51,6 +53,10 @@ public enum UnitType {
         }
 
         return null;
+    }
+
+    public int getCost() {
+        return cost;
     }
 
     public int getMovePoints() {
@@ -73,6 +79,10 @@ public enum UnitType {
         return maxAttackRange;
     }
 
+    public boolean canAttackAtDistance(int distance) {
+        return distance >= minAttackRange && distance <= maxAttackRange;
+    }
+
     public boolean canCapture() {
         return canCapture;
     }
@@ -82,7 +92,6 @@ public enum UnitType {
     }
 
     private static String normalize(String value) {
-        // Remove spaces/symbols, then compare lower-case text.
         return value.replaceAll("[^A-Za-z0-9]", "").toLowerCase();
     }
 

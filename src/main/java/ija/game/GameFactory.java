@@ -12,6 +12,10 @@ public final class GameFactory {
     private GameFactory() {
     }
 
+    /**
+     * Legacy text-based factory path kept only for compatibility and old fixtures.
+     */
+    @Deprecated(forRemoval = false)
     public static Game createGame(String[] mapDefinition) {
         return new Game(parseMap(mapDefinition));
     }
@@ -25,6 +29,10 @@ public final class GameFactory {
         return tokens;
     }
 
+    /**
+     * Legacy text-file factory path kept only for compatibility and old fixtures.
+     */
+    @Deprecated(forRemoval = false)
     public static Game createGame(Path mapFile) {
         if (mapFile == null) {
             throw new IllegalArgumentException("Map file path must not be null");
@@ -39,6 +47,58 @@ public final class GameFactory {
         }
     }
 
+    /**
+     * Main project factory path for JSON-defined scenarios.
+     */
+
+    // Note: In future might be deleted.
+    public static Game createGameFromJson(Path jsonFile) {
+        JsonMapLoader.LoadedMapData loadedMap = JsonMapLoader.load(jsonFile);
+        return createGameFromLoadedMap(loadedMap);
+    }
+
+    private static Game createGameFromLoadedMap(JsonMapLoader.LoadedMapData loadedMap) {
+        if (loadedMap == null) {
+            throw new IllegalArgumentException("Loaded map data must not be null");
+        }
+
+        Game game = createGameFromTiles(loadedMap.tiles());
+        initializeUnits(game, loadedMap);
+        initializePlayerState(game, loadedMap);
+        initializeTurnState(game, loadedMap);
+        return game;
+    }
+
+    private static Game createGameFromTiles(Tile[][] tiles) {
+        return new Game(tiles);
+    }
+
+    private static void initializeUnits(Game game, JsonMapLoader.LoadedMapData loadedMap) {
+        if (game == null || loadedMap == null) {
+            throw new IllegalArgumentException("Game and loaded map data must not be null");
+        }
+        for (JsonMapLoader.ScenarioUnitData unit : loadedMap.units()) {
+            game.createUnit(unit.type(), unit.owner(), unit.position().row(), unit.position().col());
+        }
+    }
+
+    private static void initializePlayerState(Game game, JsonMapLoader.LoadedMapData loadedMap) {
+        if (game == null || loadedMap == null) {
+            throw new IllegalArgumentException("Game and loaded map data must not be null");
+        }
+        // Placeholder for future player state initialization.
+    }
+
+    private static void initializeTurnState(Game game, JsonMapLoader.LoadedMapData loadedMap) {
+        if (game == null || loadedMap == null) {
+            throw new IllegalArgumentException("Game and loaded map data must not be null");
+        }
+        // Placeholder for future turn state initialization.
+    }
+
+    /**
+     * Legacy text parser kept only for compatibility and old fixtures.
+     */
     static Tile[][] parseMap(String[] mapDefinition) {
         if (mapDefinition == null || mapDefinition.length == 0) {
             throw new IllegalArgumentException("Map definition must not be empty");

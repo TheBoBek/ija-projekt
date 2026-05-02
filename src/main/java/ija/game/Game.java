@@ -101,6 +101,7 @@ public class Game implements Observable {
 
         // Move is valid, update position and notify observers.
         unit.setPosition(to);
+        unit.markMovedThisTurn();
         notifyObservers(new GameEvent("move", unit, from, to));
         return true;
     }

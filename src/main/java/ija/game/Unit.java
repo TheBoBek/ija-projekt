@@ -12,6 +12,8 @@ public final class Unit {
     private final String owner;
     private Position position;
     private int hp;
+    private boolean movedThisTurn;
+    private boolean actedThisTurn;
 
     public Unit(UnitType type, String owner, Position position) {
         this.type = type;
@@ -36,6 +38,18 @@ public final class Unit {
         return hp;
     }
 
+    public boolean isDestroyed() {
+        return hp == 0;
+    }
+
+    public boolean hasMovedThisTurn() {
+        return movedThisTurn;
+    }
+
+    public boolean hasActedThisTurn() {
+        return actedThisTurn;
+    }
+
     public int heal(int amount) {
         if (amount < 0) {
             throw new IllegalArgumentException("Heal amount must not be negative");
@@ -54,6 +68,19 @@ public final class Unit {
         int before = hp;
         hp = Math.max(0, hp - amount);
         return before - hp;
+    }
+
+    void markMovedThisTurn() {
+        movedThisTurn = true;
+    }
+
+    void markActedThisTurn() {
+        actedThisTurn = true;
+    }
+
+    void resetTurnFlags() {
+        movedThisTurn = false;
+        actedThisTurn = false;
     }
 
     void setPosition(Position position) {
