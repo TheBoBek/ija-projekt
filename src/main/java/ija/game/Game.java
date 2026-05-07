@@ -15,6 +15,8 @@ import java.util.PriorityQueue;
  * Main game model. Stores map, units, and observers.
  */
 public class Game implements Observable {
+    private static final BuildingService BUILDING_SERVICE = new BuildingService();
+
     private final Tile[][] map;
     private final List<Unit> units = new ArrayList<>();
     private final List<GameObserver> observers = new ArrayList<>();
@@ -126,6 +128,18 @@ public class Game implements Observable {
 
     public Tile getTileAt(int x, int y) {
         return getTileAt(new Position(x, y));
+    }
+
+    public boolean canHealUnitOnCurrentTile(Position unitPosition) {
+        Unit unit = getRequiredUnit(unitPosition);
+        Tile tile = getTileAt(unitPosition);
+        return BUILDING_SERVICE.canHeal(unit, tile);
+    }
+
+    public int healUnitOnCurrentTile(Position unitPosition) {
+        Unit unit = getRequiredUnit(unitPosition);
+        Tile tile = getTileAt(unitPosition);
+        return BUILDING_SERVICE.healIfEligible(unit, tile);
     }
 
     private boolean isInsideMap(Position position) {
@@ -240,6 +254,18 @@ public class Game implements Observable {
     private boolean isOccupiedByAnotherUnit(Position position, Unit movingUnit) {
         Unit occupant = getUnitAt(position);
         return occupant != null && occupant != movingUnit;
+    }
+
+    private Unit getRequiredUnit(Position position) {
+        if (position == null) {
+            throw new IllegalArgumentException("Position must not be null");
+        }
+
+        Unit unit = getUnitAt(position);
+        if (unit == null) {
+            throw new IllegalArgumentException("No unit at position: " + position);
+        }
+        return unit;
     }
 
     private static final class PathNode {
