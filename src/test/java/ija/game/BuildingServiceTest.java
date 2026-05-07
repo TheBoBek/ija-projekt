@@ -53,12 +53,12 @@ class BuildingServiceTest {
     }
 
     @Test
-    @DisplayName("Healing is rejected on non-city tiles")
-    void testCanHealRejectsNonCityTiles() {
+    @DisplayName("Healing is allowed on owned factory and HQ, rejected on non-building tile")
+    void testCanHealOnOwnedBuildings() {
         Unit unit = damagedUnit("P1", 20);
 
-        Assertions.assertFalse(buildingService.canHeal(unit, new Tile(TerrainType.FACTORY, "P1")));
-        Assertions.assertFalse(buildingService.canHeal(unit, new Tile(TerrainType.HQ, "P1")));
+        Assertions.assertTrue(buildingService.canHeal(unit, new Tile(TerrainType.FACTORY, "P1")));
+        Assertions.assertTrue(buildingService.canHeal(unit, new Tile(TerrainType.HQ, "P1")));
         Assertions.assertFalse(buildingService.canHeal(unit, new Tile(TerrainType.PLAIN)));
     }
 
@@ -109,8 +109,8 @@ class BuildingServiceTest {
 
         int healed = buildingService.healIfEligible(unit, factory);
 
-        Assertions.assertEquals(0, healed);
-        Assertions.assertEquals(80, unit.getHp());
+        Assertions.assertEquals(20, healed);
+        Assertions.assertEquals(100, unit.getHp());
     }
 
     @Test
@@ -129,6 +129,36 @@ class BuildingServiceTest {
         Game game = gameWithSingleCityOwnedBy("P1");
         Unit unit = game.createUnit("Infantry", "P1", 0, 0);
         unit.takeDamage(15);
+
+        int healed = game.healUnitOnCurrentTile(new Position(0, 0));
+
+        Assertions.assertEquals(15, healed);
+        Assertions.assertEquals(100, unit.getHp());
+    }
+
+    @Test
+    @DisplayName("Game healing hooks work on owned factory")
+    void testGameHealUnitOnOwnedFactory() {
+        Game game = gameWithSingleOwnedBuilding(TerrainType.FACTORY, "P1");
+        Unit unit = game.createUnit("Infantry", "P1", 0, 0);
+        unit.takeDamage(15);
+
+        Assertions.assertTrue(game.canHealUnitOnCurrentTile(new Position(0, 0)));
+
+        int healed = game.healUnitOnCurrentTile(new Position(0, 0));
+
+        Assertions.assertEquals(15, healed);
+        Assertions.assertEquals(100, unit.getHp());
+    }
+
+    @Test
+    @DisplayName("Game healing hooks work on owned HQ")
+    void testGameHealUnitOnOwnedHq() {
+        Game game = gameWithSingleOwnedBuilding(TerrainType.HQ, "P1");
+        Unit unit = game.createUnit("Infantry", "P1", 0, 0);
+        unit.takeDamage(15);
+
+        Assertions.assertTrue(game.canHealUnitOnCurrentTile(new Position(0, 0)));
 
         int healed = game.healUnitOnCurrentTile(new Position(0, 0));
 
@@ -171,6 +201,257 @@ class BuildingServiceTest {
             () -> game.healUnitOnCurrentTile(new Position(0, 0)));
     }
 
+    @Test
+    @DisplayName("Capturable building helper identifies city factory and HQ")
+    void testIsCapturableBuilding() {
+        Assertions.assertTrue(buildingService.isCapturableBuilding(new Tile(TerrainType.CITY)));
+        Assertions.assertTrue(buildingService.isCapturableBuilding(new Tile(TerrainType.FACTORY)));
+        Assertions.assertTrue(buildingService.isCapturableBuilding(new Tile(TerrainType.HQ)));
+        Assertions.assertFalse(buildingService.isCapturableBuilding(new Tile(TerrainType.PLAIN)));
+        Assertions.assertFalse(buildingService.isCapturableBuilding(new Tile(TerrainType.FOREST)));
+        Assertions.assertFalse(buildingService.isCapturableBuilding(new Tile(TerrainType.MOUNTAIN)));
+        Assertions.assertFalse(buildingService.isCapturableBuilding(new Tile(TerrainType.WATER)));
+    }
+
+    @Test
+    @DisplayName("Capture helper methods reject null arguments")
+    void testCaptureRejectsNullArguments() {
+        Unit infantry = new Unit(UnitType.INFANTRY, "P1", new Position(0, 0));
+        Tile city = new Tile(TerrainType.CITY, "P2");
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> buildingService.isCapturableBuilding(null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> buildingService.canCapture(null, city));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> buildingService.canCapture(infantry, null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> buildingService.getCapturePower(null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> buildingService.isEnemyHq(null, city));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> buildingService.isEnemyHq(infantry, null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> buildingService.captureIfEligible(null, city));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> buildingService.captureIfEligible(infantry, null));
+    }
+
+    @Test
+    @DisplayName("Capture is allowed for infantry on enemy and neutral buildings")
+    void testCanCaptureWithInfantry() {
+        Unit infantry = new Unit(UnitType.INFANTRY, "P1", new Position(0, 0));
+
+        Assertions.assertTrue(buildingService.canCapture(infantry, new Tile(TerrainType.CITY, "P2")));
+        Assertions.assertTrue(buildingService.canCapture(infantry, new Tile(TerrainType.FACTORY, "P2")));
+        Assertions.assertTrue(buildingService.canCapture(infantry, new Tile(TerrainType.HQ, "P2")));
+        Assertions.assertTrue(buildingService.canCapture(infantry, new Tile(TerrainType.CITY)));
+    }
+
+    @Test
+    @DisplayName("Capture is rejected for tank artillery own building and destroyed unit")
+    void testCanCaptureRejectsInvalidCases() {
+        Unit tank = new Unit(UnitType.TANK, "P1", new Position(0, 0));
+        Unit artillery = new Unit(UnitType.ARTILLERY, "P1", new Position(0, 0));
+        Unit ownInfantry = new Unit(UnitType.INFANTRY, "P1", new Position(0, 0));
+        Unit destroyedInfantry = damagedUnit("P1", 100);
+        Tile enemyCity = new Tile(TerrainType.CITY, "P2");
+        Tile ownFactory = new Tile(TerrainType.FACTORY, "P1");
+
+        Assertions.assertFalse(buildingService.canCapture(tank, enemyCity));
+        Assertions.assertFalse(buildingService.canCapture(artillery, enemyCity));
+        Assertions.assertFalse(buildingService.canCapture(ownInfantry, ownFactory));
+        Assertions.assertFalse(buildingService.canCapture(destroyedInfantry, enemyCity));
+    }
+
+    @Test
+    @DisplayName("Capture power is derived from current HP")
+    void testGetCapturePower() {
+        Unit full = new Unit(UnitType.INFANTRY, "P1", new Position(0, 0));
+        Unit ninetyFive = damagedUnit("P1", 5);
+        Unit ten = damagedUnit("P1", 90);
+        Unit zero = damagedUnit("P1", 100);
+
+        Assertions.assertEquals(10, buildingService.getCapturePower(full));
+        Assertions.assertEquals(9, buildingService.getCapturePower(ninetyFive));
+        Assertions.assertEquals(1, buildingService.getCapturePower(ten));
+        Assertions.assertEquals(0, buildingService.getCapturePower(zero));
+    }
+
+    @Test
+    @DisplayName("Enemy HQ helper only matches enemy headquarters")
+    void testIsEnemyHq() {
+        Unit infantry = new Unit(UnitType.INFANTRY, "P1", new Position(0, 0));
+
+        Assertions.assertTrue(buildingService.isEnemyHq(infantry, new Tile(TerrainType.HQ, "P2")));
+        Assertions.assertTrue(buildingService.isEnemyHq(infantry, new Tile(TerrainType.HQ)));
+        Assertions.assertFalse(buildingService.isEnemyHq(infantry, new Tile(TerrainType.HQ, "P1")));
+        Assertions.assertFalse(buildingService.isEnemyHq(infantry, new Tile(TerrainType.CITY, "P2")));
+    }
+
+    @Test
+    @DisplayName("Capture applies partial progress without changing owner")
+    void testCaptureIfEligiblePartialCapture() {
+        Unit infantry = new Unit(UnitType.INFANTRY, "P1", new Position(0, 0));
+        Tile city = new Tile(TerrainType.CITY, "P2");
+
+        CaptureResult result = buildingService.captureIfEligible(infantry, city);
+
+        Assertions.assertTrue(result.progressApplied());
+        Assertions.assertEquals(10, result.capturePower());
+        Assertions.assertEquals(20, result.capturePointsBefore());
+        Assertions.assertEquals(10, result.capturePointsAfter());
+        Assertions.assertFalse(result.ownershipChanged());
+        Assertions.assertFalse(result.capturedHq());
+        Assertions.assertEquals("P2", city.getOwner());
+        Assertions.assertEquals(10, city.getCapturePointsRemaining());
+    }
+
+    @Test
+    @DisplayName("Capture can complete and change owner")
+    void testCaptureIfEligibleCompletesCapture() {
+        Unit infantry = new Unit(UnitType.INFANTRY, "P1", new Position(0, 0));
+        Tile factory = new Tile(TerrainType.FACTORY, "P2");
+        factory.reduceCapturePoints(15);
+
+        CaptureResult result = buildingService.captureIfEligible(infantry, factory);
+
+        Assertions.assertTrue(result.progressApplied());
+        Assertions.assertEquals(10, result.capturePower());
+        Assertions.assertEquals(5, result.capturePointsBefore());
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, result.capturePointsAfter());
+        Assertions.assertTrue(result.ownershipChanged());
+        Assertions.assertFalse(result.capturedHq());
+        Assertions.assertEquals("P1", factory.getOwner());
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, factory.getCapturePointsRemaining());
+    }
+
+    @Test
+    @DisplayName("Capture of enemy HQ is marked in the result")
+    void testCaptureIfEligibleMarksCapturedHq() {
+        Unit infantry = new Unit(UnitType.INFANTRY, "P1", new Position(0, 0));
+        Tile hq = new Tile(TerrainType.HQ, "P2");
+        hq.reduceCapturePoints(15);
+
+        CaptureResult result = buildingService.captureIfEligible(infantry, hq);
+
+        Assertions.assertTrue(result.ownershipChanged());
+        Assertions.assertTrue(result.capturedHq());
+        Assertions.assertEquals("P1", hq.getOwner());
+    }
+
+    @Test
+    @DisplayName("Capture returns no-op result when action is not eligible")
+    void testCaptureIfEligibleReturnsNoOpResult() {
+        Unit tank = new Unit(UnitType.TANK, "P1", new Position(0, 0));
+        Tile city = new Tile(TerrainType.CITY, "P2");
+
+        CaptureResult result = buildingService.captureIfEligible(tank, city);
+
+        Assertions.assertFalse(result.progressApplied());
+        Assertions.assertEquals(0, result.capturePower());
+        Assertions.assertEquals(20, result.capturePointsBefore());
+        Assertions.assertEquals(20, result.capturePointsAfter());
+        Assertions.assertFalse(result.ownershipChanged());
+        Assertions.assertFalse(result.capturedHq());
+        Assertions.assertEquals("P2", city.getOwner());
+        Assertions.assertEquals(20, city.getCapturePointsRemaining());
+    }
+
+    @Test
+    @DisplayName("Capture with zero power keeps progress unchanged")
+    void testCaptureIfEligibleWithZeroPower() {
+        Unit infantry = damagedUnit("P1", 95);
+        Tile city = new Tile(TerrainType.CITY, "P2");
+
+        CaptureResult result = buildingService.captureIfEligible(infantry, city);
+
+        Assertions.assertFalse(result.progressApplied());
+        Assertions.assertEquals(0, result.capturePower());
+        Assertions.assertEquals(20, result.capturePointsBefore());
+        Assertions.assertEquals(20, result.capturePointsAfter());
+        Assertions.assertFalse(result.ownershipChanged());
+        Assertions.assertFalse(result.capturedHq());
+    }
+
+    @Test
+    @DisplayName("Game delegates capture checks to building service")
+    void testGameCanCaptureBuilding() {
+        Game game = gameWithSingleOwnedBuilding(TerrainType.CITY, "P2");
+        game.createUnit("Infantry", "P1", 0, 0);
+
+        Assertions.assertTrue(game.canCaptureBuilding(new Position(0, 0)));
+    }
+
+    @Test
+    @DisplayName("Game capture wrapper applies partial capture")
+    void testGameCaptureBuilding() {
+        Game game = gameWithSingleOwnedBuilding(TerrainType.CITY, "P2");
+        game.createUnit("Infantry", "P1", 0, 0);
+
+        CaptureResult result = game.captureBuilding(new Position(0, 0));
+
+        Assertions.assertTrue(result.progressApplied());
+        Assertions.assertEquals(10, game.getTileAt(0, 0).getCapturePointsRemaining());
+        Assertions.assertEquals("P2", game.getTileAt(0, 0).getOwner());
+    }
+
+    @Test
+    @DisplayName("Game capture wrappers reject null position and missing unit")
+    void testGameCaptureRejectsInvalidPositions() {
+        Game game = gameWithSingleOwnedBuilding(TerrainType.CITY, "P2");
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> game.canCaptureBuilding(null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> game.captureBuilding(null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> game.canCaptureBuilding(new Position(0, 0)));
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> game.captureBuilding(new Position(0, 0)));
+    }
+
+    @Test
+    @DisplayName("Successful move resets partial capture progress on building left behind")
+    void testMoveResetsCaptureProgressWhenLeavingBuilding() {
+        Game game = new Game(new Tile[][]{{new Tile(TerrainType.CITY, "P2"), new Tile(TerrainType.PLAIN)}});
+        game.createUnit("Infantry", "P1", 0, 0);
+        Tile city = game.getTileAt(0, 0);
+        game.captureBuilding(new Position(0, 0));
+
+        boolean moved = game.moveUnit(new Position(0, 0), new Position(0, 1));
+
+        Assertions.assertTrue(moved);
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, city.getCapturePointsRemaining());
+    }
+
+    @Test
+    @DisplayName("Failed move does not reset partial capture progress")
+    void testFailedMoveDoesNotResetCaptureProgress() {
+        Game game = new Game(new Tile[][]{{new Tile(TerrainType.CITY, "P2"), new Tile(TerrainType.PLAIN)}});
+        game.createUnit("Infantry", "P1", 0, 0);
+        Tile city = game.getTileAt(0, 0);
+        game.captureBuilding(new Position(0, 0));
+
+        boolean moved = game.moveUnit(new Position(0, 0), new Position(1, 1));
+
+        Assertions.assertFalse(moved);
+        Assertions.assertEquals(10, city.getCapturePointsRemaining());
+    }
+
+    @Test
+    @DisplayName("Leaving building with full capture progress keeps it unchanged")
+    void testMoveFromBuildingWithFullProgressDoesNothingSpecial() {
+        Game game = new Game(new Tile[][]{{new Tile(TerrainType.FACTORY, "P1"), new Tile(TerrainType.PLAIN)}});
+        game.createUnit("Infantry", "P1", 0, 0);
+        Tile factory = game.getTileAt(0, 0);
+
+        boolean moved = game.moveUnit(new Position(0, 0), new Position(0, 1));
+
+        Assertions.assertTrue(moved);
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, factory.getCapturePointsRemaining());
+    }
+
     private static Unit damagedUnit(String owner, int damageAmount) {
         Unit unit = new Unit(UnitType.INFANTRY, owner, new Position(0, 0));
         unit.takeDamage(damageAmount);
@@ -178,7 +459,11 @@ class BuildingServiceTest {
     }
 
     private static Game gameWithSingleCityOwnedBy(String owner) {
-        Tile city = new Tile(TerrainType.CITY, owner);
-        return new Game(new Tile[][]{{city}});
+        return gameWithSingleOwnedBuilding(TerrainType.CITY, owner);
+    }
+
+    private static Game gameWithSingleOwnedBuilding(TerrainType terrainType, String owner) {
+        Tile building = new Tile(terrainType, owner);
+        return new Game(new Tile[][]{{building}});
     }
 }

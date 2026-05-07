@@ -154,6 +154,14 @@ public class AdditionalEdgeCasesTest {
     }
 
     @Test
+    @DisplayName("Building tiles start with full capture points")
+    void testBuildingTilesStartWithFullCapturePoints() {
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, new Tile(TerrainType.CITY).getCapturePointsRemaining());
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, new Tile(TerrainType.FACTORY).getCapturePointsRemaining());
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, new Tile(TerrainType.HQ).getCapturePointsRemaining());
+    }
+
+    @Test
     @DisplayName("Non-building tile rejects owner")
     void testTileRejectsOwnerForPlainTile() {
         Assertions.assertThrows(IllegalArgumentException.class,
@@ -176,6 +184,66 @@ public class AdditionalEdgeCasesTest {
         Assertions.assertEquals("P1", tile.getOwner());
         tile.clearOwner();
         Assertions.assertNull(tile.getOwner());
+    }
+
+    @Test
+    @DisplayName("Capture API rejects non-building tiles")
+    void testTileCaptureApiRejectsNonBuildingTiles() {
+        Tile plain = new Tile(TerrainType.PLAIN);
+
+        Assertions.assertThrows(IllegalArgumentException.class, plain::getCapturePointsRemaining);
+        Assertions.assertThrows(IllegalArgumentException.class, plain::resetCapturePoints);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> plain.reduceCapturePoints(1));
+    }
+
+    @Test
+    @DisplayName("Building tile capture points can be reduced and reset")
+    void testTileCapturePointsMutation() {
+        Tile city = new Tile(TerrainType.CITY, "P1");
+
+        city.reduceCapturePoints(5);
+        Assertions.assertEquals(15, city.getCapturePointsRemaining());
+
+        city.reduceCapturePoints(0);
+        Assertions.assertEquals(15, city.getCapturePointsRemaining());
+
+        city.reduceCapturePoints(999);
+        Assertions.assertEquals(0, city.getCapturePointsRemaining());
+
+        city.resetCapturePoints();
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, city.getCapturePointsRemaining());
+    }
+
+    @Test
+    @DisplayName("Building tile rejects negative capture point reduction")
+    void testTileRejectsNegativeCapturePointReduction() {
+        Tile city = new Tile(TerrainType.CITY);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> city.reduceCapturePoints(-1));
+    }
+
+    @Test
+    @DisplayName("Changing owner resets partial capture progress")
+    void testTileOwnerChangeResetsCaptureProgress() {
+        Tile city = new Tile(TerrainType.CITY, "P1");
+        city.reduceCapturePoints(7);
+
+        city.setOwner("P2");
+
+        Assertions.assertEquals("P2", city.getOwner());
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, city.getCapturePointsRemaining());
+    }
+
+    @Test
+    @DisplayName("Clearing owner resets partial capture progress")
+    void testTileClearOwnerResetsCaptureProgress() {
+        Tile hq = new Tile(TerrainType.HQ, "P1");
+        hq.reduceCapturePoints(11);
+
+        hq.clearOwner();
+
+        Assertions.assertNull(hq.getOwner());
+        Assertions.assertEquals(Tile.DEFAULT_CAPTURE_POINTS, hq.getCapturePointsRemaining());
     }
 
     @Test

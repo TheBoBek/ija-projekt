@@ -101,9 +101,12 @@ public class Game implements Observable {
             return false;
         }
 
+        Tile fromTile = getTileAt(from);
+
         // Move is valid, update position and notify observers.
         unit.setPosition(to);
         unit.markMovedThisTurn();
+        resetCaptureProgressIfLeavingBuilding(fromTile);
         notifyObservers(new GameEvent("move", unit, from, to));
         return true;
     }
@@ -140,6 +143,18 @@ public class Game implements Observable {
         Unit unit = getRequiredUnit(unitPosition);
         Tile tile = getTileAt(unitPosition);
         return BUILDING_SERVICE.healIfEligible(unit, tile);
+    }
+
+    public boolean canCaptureBuilding(Position unitPosition) {
+        Unit unit = getRequiredUnit(unitPosition);
+        Tile tile = getTileAt(unitPosition);
+        return BUILDING_SERVICE.canCapture(unit, tile);
+    }
+
+    public CaptureResult captureBuilding(Position unitPosition) {
+        Unit unit = getRequiredUnit(unitPosition);
+        Tile tile = getTileAt(unitPosition);
+        return BUILDING_SERVICE.captureIfEligible(unit, tile);
     }
 
     private boolean isInsideMap(Position position) {
@@ -254,6 +269,15 @@ public class Game implements Observable {
     private boolean isOccupiedByAnotherUnit(Position position, Unit movingUnit) {
         Unit occupant = getUnitAt(position);
         return occupant != null && occupant != movingUnit;
+    }
+
+    private void resetCaptureProgressIfLeavingBuilding(Tile tile) {
+        if (!BUILDING_SERVICE.isCapturableBuilding(tile)) {
+            return;
+        }
+        if (tile.getCapturePointsRemaining() < Tile.DEFAULT_CAPTURE_POINTS) {
+            tile.resetCapturePoints();
+        }
     }
 
     private Unit getRequiredUnit(Position position) {
