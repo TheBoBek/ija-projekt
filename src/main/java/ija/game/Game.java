@@ -16,10 +16,13 @@ import java.util.PriorityQueue;
  */
 public class Game implements Observable {
     private static final BuildingService BUILDING_SERVICE = new BuildingService();
+    private static final CombatService COMBAT_SERVICE = new CombatService(new UnitDamageTable());
 
     private final Tile[][] map;
     private final List<Unit> units = new ArrayList<>();
     private final List<GameObserver> observers = new ArrayList<>();
+    private final List<Player> players = new ArrayList<>();
+    private Turn turn;
 
     // Default constructor creates an empty map.
     public Game() {
@@ -31,6 +34,8 @@ public class Game implements Observable {
             throw new IllegalArgumentException("Map must not be null");
         }
         this.map = map;
+        initializeDefaultPlayers();
+        this.turn = new Turn("P1", 1, Turn.Phase.ACTION);
     }
 
     @Override
@@ -107,7 +112,7 @@ public class Game implements Observable {
         unit.setPosition(to);
         unit.markMovedThisTurn();
         resetCaptureProgressIfLeavingBuilding(fromTile);
-        notifyObservers(new GameEvent("move", unit, from, to));
+        notifyObservers(GameEvent.move(unit, from, to));
         return true;
     }
 
@@ -133,6 +138,24 @@ public class Game implements Observable {
         return getTileAt(new Position(x, y));
     }
 
+    public Turn getTurn() {
+        return new Turn(turn.getCurrentPlayer(), turn.getTurnNumber(), turn.getPhase());
+    }
+
+    public Player getPlayer(String playerId) {
+        if (playerId == null || playerId.isBlank()) {
+            throw new IllegalArgumentException("Player id must not be blank");
+        }
+
+        for (Player player : players) {
+            if (player.getPlayerId().equals(playerId)) {
+                return new Player(player.getPlayerId(), player.getMoney());
+            }
+        }
+
+        throw new IllegalArgumentException("Unknown player id: " + playerId);
+    }
+
     public boolean canHealUnitOnCurrentTile(Position unitPosition) {
         Unit unit = getRequiredUnit(unitPosition);
         Tile tile = getTileAt(unitPosition);
@@ -143,6 +166,39 @@ public class Game implements Observable {
         Unit unit = getRequiredUnit(unitPosition);
         Tile tile = getTileAt(unitPosition);
         return BUILDING_SERVICE.healIfEligible(unit, tile);
+    }
+
+    public boolean canAttack(Position attackerPosition, Position defenderPosition) {
+        if (attackerPosition == null || defenderPosition == null) {
+            return false;
+        }
+        if (!isInsideMap(attackerPosition) || !isInsideMap(defenderPosition)) {
+            return false;
+        }
+
+        Unit attacker = getUnitAt(attackerPosition);
+        Unit defender = getUnitAt(defenderPosition);
+        if (attacker == null || defender == null) {
+            return false;
+        }
+
+        return COMBAT_SERVICE.canAttack(attacker, defender);
+    }
+
+    public CombatResult attack(Position attackerPosition, Position defenderPosition) {
+        Unit attacker = getRequiredUnit(attackerPosition);
+        Unit defender = getRequiredUnit(defenderPosition);
+
+        if (!canAttack(attackerPosition, defenderPosition)) {
+            throw new IllegalArgumentException("Attack is not allowed");
+        }
+
+        Tile attackerTile = getTileAt(attackerPosition);
+        Tile defenderTile = getTileAt(defenderPosition);
+        CombatResult result = COMBAT_SERVICE.resolveAttack(attacker, attackerTile, defender, defenderTile);
+        removeDestroyedUnits(attacker, defender);
+        notifyObservers(GameEvent.attack(attacker, defender, attackerPosition, defenderPosition, result));
+        return result;
     }
 
     public boolean canCaptureBuilding(Position unitPosition) {
@@ -271,12 +327,27 @@ public class Game implements Observable {
         return occupant != null && occupant != movingUnit;
     }
 
+    private void initializeDefaultPlayers() {
+        players.clear();
+        players.add(new Player("P1", 0));
+        players.add(new Player("P2", 0));
+    }
+
     private void resetCaptureProgressIfLeavingBuilding(Tile tile) {
         if (!BUILDING_SERVICE.isCapturableBuilding(tile)) {
             return;
         }
         if (tile.getCapturePointsRemaining() < Tile.DEFAULT_CAPTURE_POINTS) {
             tile.resetCapturePoints();
+        }
+    }
+
+    private void removeDestroyedUnits(Unit attacker, Unit defender) {
+        if (defender != null && defender.isDestroyed()) {
+            units.remove(defender);
+        }
+        if (attacker != null && attacker.isDestroyed()) {
+            units.remove(attacker);
         }
     }
 

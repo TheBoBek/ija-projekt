@@ -65,7 +65,7 @@ public final class GameFactory {
         Game game = createGameFromTiles(loadedMap.tiles());
         initializeUnits(game, loadedMap);
         initializePlayerState(game, loadedMap);
-        initializeTurnState(game, loadedMap);
+        initializeTurn(game, loadedMap);
         return game;
     }
 
@@ -89,11 +89,11 @@ public final class GameFactory {
         // Placeholder for future player state initialization.
     }
 
-    private static void initializeTurnState(Game game, JsonMapLoader.LoadedMapData loadedMap) {
+    private static void initializeTurn(Game game, JsonMapLoader.LoadedMapData loadedMap) {
         if (game == null || loadedMap == null) {
             throw new IllegalArgumentException("Game and loaded map data must not be null");
         }
-        // Placeholder for future turn state initialization.
+        // Placeholder for future turn initialization from runtime JSON metadata.
     }
 
     /**

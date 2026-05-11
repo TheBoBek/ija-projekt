@@ -1,6 +1,7 @@
 package ija;
 
 import ija.common.GameEvent;
+import ija.common.GameEventType;
 import ija.common.Position;
 import ija.game.Game;
 import ija.game.GameFactory;
@@ -1114,10 +1115,12 @@ public class AdditionalEdgeCasesTest {
 
         Assertions.assertTrue(moved);
         Assertions.assertNotNull(observer.lastEvent);
-        Assertions.assertEquals("move", observer.lastEvent.type());
-        Assertions.assertEquals(unit, observer.lastEvent.unit());
+        Assertions.assertEquals(GameEventType.MOVE, observer.lastEvent.type());
+        Assertions.assertEquals(unit, observer.lastEvent.actor());
+        Assertions.assertNull(observer.lastEvent.target());
         Assertions.assertEquals(from, observer.lastEvent.from());
         Assertions.assertEquals(to, observer.lastEvent.to());
+        Assertions.assertNull(observer.lastEvent.combatResult());
     }
 
     @Test
