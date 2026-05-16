@@ -21,4 +21,24 @@ public record GameEvent(
     public static GameEvent attack(Unit actor, Unit target, Position from, Position to, CombatResult combatResult) {
         return new GameEvent(GameEventType.ATTACK, actor, target, from, to, combatResult);
     }
+
+    public static GameEvent wait(Unit actor, Position at) {
+        return new GameEvent(GameEventType.WAIT, actor, null, at, at, null);
+    }
+
+    public static GameEvent capture(Unit actor, Position at) {
+        return new GameEvent(GameEventType.CAPTURE, actor, null, at, at, null);
+    }
+
+    public static GameEvent purchase(Unit actor, Position at) {
+        return new GameEvent(GameEventType.PURCHASE, actor, null, at, at, null);
+    }
+
+    public static GameEvent income() {
+        return new GameEvent(GameEventType.INCOME, null, null, null, null, null);
+    }
+
+    public static GameEvent endTurn() {
+        return new GameEvent(GameEventType.END_TURN, null, null, null, null, null);
+    }
 }

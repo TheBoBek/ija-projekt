@@ -5,5 +5,10 @@ package ija.common;
  */
 public enum GameEventType {
     MOVE,
-    ATTACK
+    ATTACK,
+    WAIT,
+    CAPTURE,
+    PURCHASE,
+    INCOME,
+    END_TURN
 }
