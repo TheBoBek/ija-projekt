@@ -38,13 +38,17 @@ public final class JsonMapLoader {
             Tile[][] tiles = parseGrid(definition.grid, definition.metadata);
             applyBuildings(tiles, definition.buildings);
             List<ScenarioUnitData> units = parseUnits(definition.units, tiles);
+            List<ScenarioPlayerState> players = parseRuntimePlayers(definition);
+            ScenarioTurnState turn = parseRuntimeTurn(definition);
 
             return new LoadedMapData(
                 definition.metadata.name,
                 definition.metadata.width,
                 definition.metadata.height,
                 tiles,
-                units
+                units,
+                players,
+                turn
             );
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot read JSON map: " + jsonFile, e);
@@ -243,6 +247,74 @@ public final class JsonMapLoader {
         return parsedUnits;
     }
 
+    private static List<ScenarioPlayerState> parseRuntimePlayers(JsonMapDefinition definition) {
+        List<PlayerRuntimeDefinition> players = null;
+        if (definition.runtime != null && definition.runtime.players != null) {
+            players = definition.runtime.players;
+        } else if (definition.players != null) {
+            players = definition.players;
+        }
+        if (players == null) {
+            return List.of();
+        }
+
+        List<ScenarioPlayerState> parsed = new ArrayList<>();
+        Set<String> seenPlayers = new HashSet<>();
+        for (PlayerRuntimeDefinition player : players) {
+            if (player == null) {
+                throw new IllegalArgumentException("Runtime player entry must not be null");
+            }
+            if (player.id == null || player.id.isBlank()) {
+                throw new IllegalArgumentException("Runtime player id must be present");
+            }
+            if (!ALLOWED_OWNERS.contains(player.id)) {
+                throw new IllegalArgumentException("Unsupported runtime player id: " + player.id);
+            }
+            if (!seenPlayers.add(player.id)) {
+                throw new IllegalArgumentException("Duplicate runtime player id: " + player.id);
+            }
+            if (player.money == null) {
+                throw new IllegalArgumentException("Runtime player money must be present");
+            }
+            if (player.money < 0) {
+                throw new IllegalArgumentException("Runtime player money must not be negative");
+            }
+            parsed.add(new ScenarioPlayerState(player.id, player.money));
+        }
+        return parsed;
+    }
+
+    private static ScenarioTurnState parseRuntimeTurn(JsonMapDefinition definition) {
+        TurnRuntimeDefinition turn = null;
+        if (definition.runtime != null && definition.runtime.turn != null) {
+            turn = definition.runtime.turn;
+        } else if (definition.turn != null) {
+            turn = definition.turn;
+        }
+        if (turn == null) {
+            return null;
+        }
+        if (turn.currentPlayer == null || turn.currentPlayer.isBlank()) {
+            throw new IllegalArgumentException("Runtime turn currentPlayer must be present");
+        }
+        if (!ALLOWED_OWNERS.contains(turn.currentPlayer)) {
+            throw new IllegalArgumentException("Unsupported runtime turn currentPlayer: " + turn.currentPlayer);
+        }
+        if (turn.turnNumber == null || turn.turnNumber <= 0) {
+            throw new IllegalArgumentException("Runtime turn turnNumber must be positive");
+        }
+        if (turn.phase == null || turn.phase.isBlank()) {
+            throw new IllegalArgumentException("Runtime turn phase must be present");
+        }
+        Turn.Phase parsedPhase;
+        try {
+            parsedPhase = Turn.Phase.valueOf(turn.phase.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unsupported runtime turn phase: " + turn.phase);
+        }
+        return new ScenarioTurnState(turn.currentPlayer, turn.turnNumber, parsedPhase);
+    }
+
     private static boolean isInside(Tile[][] tiles, Position position) {
         int row = position.row();
         int col = position.col();
@@ -254,11 +326,19 @@ public final class JsonMapLoader {
         int width,
         int height,
         Tile[][] tiles,
-        List<ScenarioUnitData> units
+        List<ScenarioUnitData> units,
+        List<ScenarioPlayerState> players,
+        ScenarioTurnState turn
     ) {
     }
 
     public record ScenarioUnitData(String type, String owner, Position position) {
+    }
+
+    public record ScenarioPlayerState(String id, int money) {
+    }
+
+    public record ScenarioTurnState(String currentPlayer, int turnNumber, Turn.Phase phase) {
     }
 
     private static final class JsonMapDefinition {
@@ -266,6 +346,9 @@ public final class JsonMapLoader {
         private List<List<String>> grid;
         private List<BuildingDefinition> buildings;
         private List<UnitDefinition> units;
+        private RuntimeDefinition runtime;
+        private List<PlayerRuntimeDefinition> players;
+        private TurnRuntimeDefinition turn;
     }
 
     private static final class MapMetadata {
@@ -285,5 +368,21 @@ public final class JsonMapLoader {
         private String owner;
         private Integer row;
         private Integer col;
+    }
+
+    private static final class RuntimeDefinition {
+        private List<PlayerRuntimeDefinition> players;
+        private TurnRuntimeDefinition turn;
+    }
+
+    private static final class PlayerRuntimeDefinition {
+        private String id;
+        private Integer money;
+    }
+
+    private static final class TurnRuntimeDefinition {
+        private String currentPlayer;
+        private Integer turnNumber;
+        private String phase;
     }
 }

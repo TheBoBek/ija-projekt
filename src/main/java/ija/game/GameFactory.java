@@ -86,14 +86,20 @@ public final class GameFactory {
         if (game == null || loadedMap == null) {
             throw new IllegalArgumentException("Game and loaded map data must not be null");
         }
-        // Placeholder for future player state initialization.
+        for (JsonMapLoader.ScenarioPlayerState playerState : loadedMap.players()) {
+            game.setPlayerMoney(playerState.id(), playerState.money());
+        }
     }
 
     private static void initializeTurn(Game game, JsonMapLoader.LoadedMapData loadedMap) {
         if (game == null || loadedMap == null) {
             throw new IllegalArgumentException("Game and loaded map data must not be null");
         }
-        // Placeholder for future turn initialization from runtime JSON metadata.
+        JsonMapLoader.ScenarioTurnState turn = loadedMap.turn();
+        if (turn == null) {
+            return;
+        }
+        game.setTurnState(turn.currentPlayer(), turn.turnNumber(), turn.phase());
     }
 
     /**
