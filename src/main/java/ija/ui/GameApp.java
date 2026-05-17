@@ -77,8 +77,6 @@ public class GameApp extends Application {
     private static final double GRID_PADDING = 6;
     private static final Path SCENARIO_ONE_PATH = Path.of("data", "maps", "scenario-alpha.json");
     private static final Path SCENARIO_TWO_PATH = Path.of("data", "maps", "scenario-beta.json");
-    private static final Path LEGACY_SCENARIO_ONE_PATH = Path.of("maps", "scenario-alpha.json");
-    private static final Path LEGACY_SCENARIO_TWO_PATH = Path.of("maps", "scenario-beta.json");
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final DummyBot dummyBot = new DummyBot();
@@ -179,12 +177,10 @@ public class GameApp extends Application {
         botVsBotStopButton.setOnAction(event -> stopBotVsBot(true));
 
         mapOneButton = new Button("Scenario 1");
-        mapOneButton.setOnAction(event ->
-            loadBundledScenario(resolveScenarioPath(SCENARIO_ONE_PATH, LEGACY_SCENARIO_ONE_PATH), "Scenario 1"));
+        mapOneButton.setOnAction(event -> loadBundledScenario(SCENARIO_ONE_PATH, "Scenario 1"));
 
         mapTwoButton = new Button("Scenario 2");
-        mapTwoButton.setOnAction(event ->
-            loadBundledScenario(resolveScenarioPath(SCENARIO_TWO_PATH, LEGACY_SCENARIO_TWO_PATH), "Scenario 2"));
+        mapTwoButton.setOnAction(event -> loadBundledScenario(SCENARIO_TWO_PATH, "Scenario 2"));
 
         replayBackButton = new Button("Replay Turn <");
         replayBackButton.setOnAction(event -> stepReplayBackward());
@@ -307,21 +303,10 @@ public class GameApp extends Application {
 
     private Game loadInitialGame() {
         try {
-            return GameFactory.createGameFromJson(resolveScenarioPath(SCENARIO_ONE_PATH, LEGACY_SCENARIO_ONE_PATH));
-        } catch (IllegalArgumentException ignored) {
-            try {
-                return GameFactory.createGameFromJson(resolveScenarioPath(SCENARIO_TWO_PATH, LEGACY_SCENARIO_TWO_PATH));
-            } catch (IllegalArgumentException ignoredAgain) {
-                return createFallbackDemoGame();
-            }
+            return GameFactory.createGameFromJson(SCENARIO_ONE_PATH);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalStateException("Failed to load startup scenario: " + SCENARIO_ONE_PATH, ex);
         }
-    }
-
-    private Path resolveScenarioPath(Path preferred, Path fallback) {
-        if (preferred != null && Files.exists(preferred)) {
-            return preferred;
-        }
-        return fallback;
     }
 
     private void loadBundledScenario(Path scenarioPath, String label) {
@@ -976,6 +961,7 @@ public class GameApp extends Application {
                 setStatus("Replay log is empty.");
                 return;
             }
+            validateReplayEntries(loaded.entries());
 
             replayEntries.clear();
             replayEntries.addAll(loaded.entries());
@@ -1136,10 +1122,18 @@ public class GameApp extends Application {
         }
     }
 
+    private void validateReplayEntries(List<ReplayEntry> entries) {
+        for (int index = 0; index < entries.size(); index++) {
+            ReplayEntry entry = entries.get(index);
+            if (entry == null || entry.state() == null || entry.state().turn() == null) {
+                throw new IllegalArgumentException("Replay entry " + index + " is missing required turn state");
+            }
+        }
+    }
+
     private String replayTurnKey(ReplayEntry entry, int index) {
         if (entry == null || entry.state() == null || entry.state().turn() == null) {
-            // Fallback for malformed/legacy logs: each entry acts as an anchor.
-            return "ENTRY_" + index;
+            throw new IllegalArgumentException("Replay entry " + index + " is missing required turn state");
         }
         GameState.TurnState turn = entry.state().turn();
         return turn.turnNumber() + "|" + turn.currentPlayer();
@@ -1238,54 +1232,5 @@ public class GameApp extends Application {
     private record ReplayLogFile(
         List<ReplayEntry> entries
     ) {
-    }
-
-    private Game createFallbackDemoGame() {
-        Game demo = GameFactory.createGame(new String[]{
-            "H P P P P P P P P P P H",
-            "P P P P P P P P P P P P",
-            "P T F P P P P P P F T P",
-            "P P P P M P P M P P P P",
-            "P P P P P P P P P P P P",
-            "P C P W P P P P W P C P",
-            "P P P P P P P P P P P P",
-            "P P P P M P P M P P P P",
-            "P T F P P P P P P F T P",
-            "P P P P P P P P P P P P",
-            "P P P P P P P P P P P P",
-            "H P P P P P P P P P P H"
-        });
-
-        demo.getTileAt(0, 0).setOwner("P1");
-        demo.getTileAt(11, 0).setOwner("P1");
-        demo.getTileAt(0, 11).setOwner("P2");
-        demo.getTileAt(11, 11).setOwner("P2");
-        demo.getTileAt(2, 1).setOwner("P1");
-        demo.getTileAt(8, 1).setOwner("P1");
-        demo.getTileAt(2, 10).setOwner("P2");
-        demo.getTileAt(8, 10).setOwner("P2");
-        demo.getTileAt(5, 1).setOwner("P1");
-        demo.getTileAt(5, 10).setOwner("P2");
-
-        // Left side: red infantry, default orientation (not flipped).
-        for (int row = 1; row <= 10; row++) {
-            Unit redInfantry = demo.createUnit("Infantry", "P1", row, 0);
-            facingByUnit.put(redInfantry, 1);
-        }
-
-        // Right side: blue infantry, tanks, and artillery, initially flipped horizontally.
-        for (int row = 1; row <= 4; row++) {
-            Unit blueInfantry = demo.createUnit("Infantry", "P2", row, 11);
-            facingByUnit.put(blueInfantry, -1);
-        }
-        for (int row = 5; row <= 7; row++) {
-            Unit blueTank = demo.createUnit("Tank", "P2", row, 11);
-            facingByUnit.put(blueTank, -1);
-        }
-        for (int row = 8; row <= 10; row++) {
-            Unit blueArtillery = demo.createUnit("Artillery", "P2", row, 11);
-            facingByUnit.put(blueArtillery, -1);
-        }
-        return demo;
     }
 }

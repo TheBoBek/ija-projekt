@@ -16,16 +16,8 @@ import java.util.Map;
  * Lazy image loader for terrain and unit sprites.
  */
 final class SpriteLibrary {
-    private final Path terrainDirectory = resolveTerrainDirectory();
+    private final Path terrainDirectory = Path.of("lib", "terrain");
     private final Map<String, Image> cache = new HashMap<>();
-
-    private static Path resolveTerrainDirectory() {
-        Path preferred = Path.of("lib", "terrain");
-        if (Files.exists(preferred)) {
-            return preferred;
-        }
-        return Path.of("assets", "terrain");
-    }
 
     Image terrain(Tile tile) {
         if (tile == null) {

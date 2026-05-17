@@ -15,13 +15,13 @@ class ScenarioMapsTest {
     @Test
     @DisplayName("Scenario alpha loads and contains required terrain/buildings")
     void testScenarioAlphaRequirements() {
-        assertScenarioMeetsMinimalRequirements(Path.of("maps", "scenario-alpha.json"));
+        assertScenarioMeetsMinimalRequirements(Path.of("data", "maps", "scenario-alpha.json"));
     }
 
     @Test
     @DisplayName("Scenario beta loads and contains required terrain/buildings")
     void testScenarioBetaRequirements() {
-        assertScenarioMeetsMinimalRequirements(Path.of("maps", "scenario-beta.json"));
+        assertScenarioMeetsMinimalRequirements(Path.of("data", "maps", "scenario-beta.json"));
     }
 
     private void assertScenarioMeetsMinimalRequirements(Path mapPath) {
