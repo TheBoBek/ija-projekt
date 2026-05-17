@@ -1,3 +1,11 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - alegzoo (2026-05-16)
+ *   - 2026-05-16: Add game event types
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor GameEventModelTest v balíku ija.game.
+ */
 package ija.game;
 
 import ija.common.GameEvent;

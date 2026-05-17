@@ -1,3 +1,14 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - alegzoo (2026-05-16)
+ *   - 2026-05-16: Add game event types
+ * - TheBoBek (2026-05-02 až 2026-05-11)
+ *   - 2026-05-11: Add Turn, money and player logic
+ *   - 2026-05-02: Add task 2, implement Tile data handle and refactor TerrainType and TerrainDef.
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor GameEvent v balíku ija.common.
+ */
 package ija.common;
 
 import ija.game.CombatResult;

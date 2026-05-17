@@ -1,3 +1,11 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - alegzoo (2026-05-17)
+ *   - 2026-05-17: Add game logic + UI
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor ScenarioMapsTest v balíku ija.game.
+ */
 package ija.game;
 
 import ija.common.Position;

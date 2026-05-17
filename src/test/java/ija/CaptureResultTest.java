@@ -1,3 +1,11 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - TheBoBek (2026-05-07)
+ *   - 2026-05-07: Extend CombatService + tests + Add factory validation API.
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor CaptureResultTest v balíku ija.
+ */
 package ija;
 
 import ija.game.CaptureResult;

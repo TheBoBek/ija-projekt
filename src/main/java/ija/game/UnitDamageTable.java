@@ -1,3 +1,11 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - TheBoBek (2026-05-02)
+ *   - 2026-05-02: Add unit load from JSON, Artillery, UnitDamageTable and created tests
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor UnitDamageTable v balíku ija.game.
+ */
 package ija.game;
 
 import java.util.EnumMap;

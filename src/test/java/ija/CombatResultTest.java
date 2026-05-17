@@ -1,3 +1,11 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - TheBoBek (2026-05-07)
+ *   - 2026-05-07: Add CombatResult + tests
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor CombatResultTest v balíku ija.
+ */
 package ija;
 
 import ija.game.CombatResult;

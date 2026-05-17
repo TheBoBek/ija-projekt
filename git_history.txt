@@ -1,6 +1,7 @@
+2026-05-17 alegzoo: WIP on main: a6d8445 update git_history
+2026-05-17 alegzoo: index on main: a6d8445 update git_history
+2026-05-17 alegzoo: update git_history
 2026-05-17 alegzoo: Minimal layout changes + docs + ai_audit
-2026-05-17 alegzoo: WIP on main: 312ad50 Add game logic + UI
-2026-05-17 alegzoo: index on main: 312ad50 Add game logic + UI
 2026-05-17 TheBoBek: Prepare assignment files and simplify engine validation
 2026-05-17 alegzoo: Add game logic + UI
 2026-05-17 alegzoo: Add bot + test

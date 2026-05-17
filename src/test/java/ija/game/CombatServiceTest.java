@@ -1,3 +1,12 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - TheBoBek (2026-05-07 až 2026-05-17)
+ *   - 2026-05-17: Prepare assignment files and simplify engine validation
+ *   - 2026-05-07: Extend CombatService + tests + Add factory validation API.
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor CombatServiceTest v balíku ija.game.
+ */
 package ija.game;
 
 import ija.common.Position;

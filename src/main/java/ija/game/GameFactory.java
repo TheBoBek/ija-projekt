@@ -1,3 +1,16 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - TheBoBek (2026-05-02 až 2026-05-17)
+ *   - 2026-05-17: Prepare assignment files and simplify engine validation
+ *   - 2026-05-11: Add Turn, money and player logic
+ *   - 2026-05-02: Add unit load from JSON, Artillery, UnitDamageTable and created tests
+ *   - 2026-05-02: Add task 2, implement Tile data handle and refactor TerrainType and TerrainDef.
+ * - alegzoo (2026-05-16)
+ *   - 2026-05-16: Implement json map loader
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor GameFactory v balíku ija.game.
+ */
 package ija.game;
 
 import java.io.IOException;

@@ -1,3 +1,11 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - alegzoo (2026-05-17)
+ *   - 2026-05-17: Add sprite loading library
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor SpriteLibrary v balíku ija.ui.
+ */
 package ija.ui;
 
 import ija.game.TerrainType;
@@ -15,8 +23,16 @@ import java.util.Map;
  * Lazy image loader for terrain and unit sprites.
  */
 final class SpriteLibrary {
-    private final Path terrainDirectory = Path.of("assets", "terrain");
+    private final Path terrainDirectory = resolveTerrainDirectory();
     private final Map<String, Image> cache = new HashMap<>();
+
+    private static Path resolveTerrainDirectory() {
+        Path preferred = Path.of("lib", "terrain");
+        if (Files.exists(preferred)) {
+            return preferred;
+        }
+        return Path.of("assets", "terrain");
+    }
 
     Image terrain(Tile tile) {
         if (tile == null) {

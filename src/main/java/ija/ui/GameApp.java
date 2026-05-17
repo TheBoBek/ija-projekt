@@ -1,3 +1,12 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - alegzoo (2026-05-17)
+ *   - 2026-05-17: Minimal layout changes + docs + ai_audit
+ *   - 2026-05-17: Add game logic + UI
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor GameApp v balíku ija.ui.
+ */
 package ija.ui;
 
 import com.google.gson.Gson;
@@ -74,8 +83,10 @@ public class GameApp extends Application {
     private static final double SOLDIER_EXTRA_SCALE = 0.68;
     private static final double GRID_GAP = 2;
     private static final double GRID_PADDING = 6;
-    private static final Path SCENARIO_ONE_PATH = Path.of("maps", "scenario-alpha.json");
-    private static final Path SCENARIO_TWO_PATH = Path.of("maps", "scenario-beta.json");
+    private static final Path SCENARIO_ONE_PATH = Path.of("data", "maps", "scenario-alpha.json");
+    private static final Path SCENARIO_TWO_PATH = Path.of("data", "maps", "scenario-beta.json");
+    private static final Path LEGACY_SCENARIO_ONE_PATH = Path.of("maps", "scenario-alpha.json");
+    private static final Path LEGACY_SCENARIO_TWO_PATH = Path.of("maps", "scenario-beta.json");
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final DummyBot dummyBot = new DummyBot();
@@ -176,10 +187,12 @@ public class GameApp extends Application {
         botVsBotStopButton.setOnAction(event -> stopBotVsBot(true));
 
         mapOneButton = new Button("Scenario 1");
-        mapOneButton.setOnAction(event -> loadBundledScenario(SCENARIO_ONE_PATH, "Scenario 1"));
+        mapOneButton.setOnAction(event ->
+            loadBundledScenario(resolveScenarioPath(SCENARIO_ONE_PATH, LEGACY_SCENARIO_ONE_PATH), "Scenario 1"));
 
         mapTwoButton = new Button("Scenario 2");
-        mapTwoButton.setOnAction(event -> loadBundledScenario(SCENARIO_TWO_PATH, "Scenario 2"));
+        mapTwoButton.setOnAction(event ->
+            loadBundledScenario(resolveScenarioPath(SCENARIO_TWO_PATH, LEGACY_SCENARIO_TWO_PATH), "Scenario 2"));
 
         replayBackButton = new Button("Replay Turn <");
         replayBackButton.setOnAction(event -> stepReplayBackward());
@@ -302,14 +315,21 @@ public class GameApp extends Application {
 
     private Game loadInitialGame() {
         try {
-            return GameFactory.createGameFromJson(SCENARIO_ONE_PATH);
+            return GameFactory.createGameFromJson(resolveScenarioPath(SCENARIO_ONE_PATH, LEGACY_SCENARIO_ONE_PATH));
         } catch (IllegalArgumentException ignored) {
             try {
-                return GameFactory.createGameFromJson(SCENARIO_TWO_PATH);
+                return GameFactory.createGameFromJson(resolveScenarioPath(SCENARIO_TWO_PATH, LEGACY_SCENARIO_TWO_PATH));
             } catch (IllegalArgumentException ignoredAgain) {
                 return createFallbackDemoGame();
             }
         }
+    }
+
+    private Path resolveScenarioPath(Path preferred, Path fallback) {
+        if (preferred != null && Files.exists(preferred)) {
+            return preferred;
+        }
+        return fallback;
     }
 
     private void loadBundledScenario(Path scenarioPath, String label) {

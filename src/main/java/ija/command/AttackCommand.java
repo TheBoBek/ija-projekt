@@ -1,3 +1,11 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - alegzoo (2026-05-17)
+ *   - 2026-05-17: Add attack command
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor AttackCommand v balíku ija.command.
+ */
 package ija.command;
 
 import ija.common.Position;

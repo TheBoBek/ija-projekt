@@ -1,3 +1,16 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - TheBoBek (2026-05-02 až 2026-05-17)
+ *   - 2026-05-17: Prepare assignment files and simplify engine validation
+ *   - 2026-05-11: Add Turn, money and player logic
+ *   - 2026-05-07: Extend CombatService + tests + Add factory validation API.
+ *   - 2026-05-02: Add unit load from JSON, Artillery, UnitDamageTable and created tests
+ * - alegzoo (2026-05-17)
+ *   - 2026-05-17: Add game logic + UI
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor AdditionalEdgeCasesTest v balíku ija.
+ */
 package ija;
 
 import ija.common.GameEvent;

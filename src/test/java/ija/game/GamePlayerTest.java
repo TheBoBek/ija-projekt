@@ -1,3 +1,11 @@
+/**
+ * Autoři a změny podle commit historie:
+ * - TheBoBek (2026-05-11)
+ *   - 2026-05-11: Add Turn, money and player logic
+ *
+ * Popis obsahu:
+ * - Zdrojový soubor GamePlayerTest v balíku ija.game.
+ */
 package ija.game;
 
 import org.junit.jupiter.api.Assertions;
