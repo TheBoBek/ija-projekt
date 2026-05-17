@@ -7,6 +7,7 @@ import ija.game.Game;
 import ija.game.GameFactory;
 import ija.game.TerrainType;
 import ija.game.Tile;
+import ija.game.Turn;
 import ija.game.Unit;
 import ija.game.UnitType;
 import ija.observer.GameObserver;
@@ -424,6 +425,75 @@ public class AdditionalEdgeCasesTest {
         Assertions.assertEquals("P1", first.getTileAt(0, 0).getOwner());
         Assertions.assertTrue(second.getTileAt(0, 0).isHq());
         Assertions.assertEquals("P2", second.getTileAt(0, 0).getOwner());
+    }
+
+    @Test
+    @DisplayName("GameFactory initializes runtime players and turn from JSON")
+    void testCreateGameFromJsonInitializesRuntimeState(@TempDir Path tempDir) throws IOException {
+        Path jsonFile = writeJson(
+            tempDir,
+            """
+                {
+                  "metadata": { "name": "runtime-map", "width": 1, "height": 1 },
+                  "grid": [
+                    ["C"]
+                  ],
+                  "buildings": [
+                    { "row": 0, "col": 0, "owner": "P1" }
+                  ],
+                  "units": [],
+                  "runtime": {
+                    "players": [
+                      { "id": "P1", "money": 5000 },
+                      { "id": "P2", "money": 1200 }
+                    ],
+                    "turn": {
+                      "currentPlayer": "P2",
+                      "turnNumber": 4,
+                      "phase": "INCOME"
+                    }
+                  }
+                }
+                """
+        );
+
+        Game game = GameFactory.createGameFromJson(jsonFile);
+
+        Assertions.assertEquals(5000, game.getPlayer("P1").getMoney());
+        Assertions.assertEquals(1200, game.getPlayer("P2").getMoney());
+        Turn turn = game.getTurn();
+        Assertions.assertEquals("P2", turn.getCurrentPlayer());
+        Assertions.assertEquals(4, turn.getTurnNumber());
+        Assertions.assertEquals(Turn.Phase.INCOME, turn.getPhase());
+    }
+
+    @Test
+    @DisplayName("JSON loader rejects unsupported runtime turn phase")
+    void testJsonRejectsUnsupportedRuntimeTurnPhase(@TempDir Path tempDir) throws IOException {
+        Path jsonFile = writeJson(
+            tempDir,
+            """
+                {
+                  "metadata": { "name": "runtime-map", "width": 1, "height": 1 },
+                  "grid": [
+                    ["C"]
+                  ],
+                  "buildings": [
+                    { "row": 0, "col": 0, "owner": "P1" }
+                  ],
+                  "units": [],
+                  "runtime": {
+                    "turn": {
+                      "currentPlayer": "P1",
+                      "turnNumber": 1,
+                      "phase": "BAD_PHASE"
+                    }
+                  }
+                }
+                """
+        );
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> GameFactory.createGameFromJson(jsonFile));
     }
 
     @Test
@@ -1013,7 +1083,7 @@ public class AdditionalEdgeCasesTest {
     }
 
     @Test
-    @DisplayName("Occupied tile blocks pathfinding")
+    @DisplayName("Enemy occupied tile blocks pathfinding")
     void testOccupiedTileBlocksMovementPath() {
         Game game = GameFactory.createGame(new String[]{"P P P"});
         Unit left = game.createUnit("Infantry", "P1", 0, 0);
@@ -1022,6 +1092,19 @@ public class AdditionalEdgeCasesTest {
         List<Position> reachable = game.getReachableTiles(left.getPosition());
         Assertions.assertFalse(reachable.contains(new Position(0, 1)));
         Assertions.assertFalse(reachable.contains(new Position(0, 2)));
+    }
+
+    @Test
+    @DisplayName("Friendly occupied tile is pass-through but not a valid destination")
+    void testFriendlyOccupiedTileIsPassThrough() {
+        Game game = GameFactory.createGame(new String[]{"P P P P"});
+        Unit left = game.createUnit("Infantry", "P1", 0, 0);
+        game.createUnit("Infantry", "P1", 0, 1);
+
+        List<Position> reachable = game.getReachableTiles(left.getPosition());
+        Assertions.assertFalse(reachable.contains(new Position(0, 1)));
+        Assertions.assertTrue(reachable.contains(new Position(0, 2)));
+        Assertions.assertTrue(reachable.contains(new Position(0, 3)));
     }
 
     @Test
@@ -1041,6 +1124,33 @@ public class AdditionalEdgeCasesTest {
 
         boolean moved = game.moveUnit(first.getPosition(), new Position(0, 1));
         Assertions.assertFalse(moved);
+    }
+
+    @Test
+    @DisplayName("Move by zero tiles is valid and keeps unit on place")
+    void testMoveByZeroTiles() {
+        class CountingObserver implements GameObserver {
+            int count = 0;
+
+            @Override
+            public void update(GameEvent event) {
+                count++;
+            }
+        }
+
+        Game game = GameFactory.createGame(new String[]{"P"});
+        CountingObserver observer = new CountingObserver();
+        game.addObserver(observer);
+        Unit unit = game.createUnit("Infantry", "P1", 0, 0);
+        Position origin = unit.getPosition();
+
+        boolean moved = game.moveUnit(origin, origin);
+
+        Assertions.assertTrue(moved);
+        Assertions.assertEquals(origin, unit.getPosition());
+        Assertions.assertFalse(unit.hasMovedThisTurn());
+        Assertions.assertFalse(unit.hasActedThisTurn());
+        Assertions.assertEquals(1, observer.count);
     }
 
     @Test
@@ -1233,6 +1343,23 @@ public class AdditionalEdgeCasesTest {
         Assertions.assertTrue(moved);
         Assertions.assertTrue(unit.hasMovedThisTurn());
         Assertions.assertFalse(unit.hasActedThisTurn());
+    }
+
+    @Test
+    @DisplayName("Unit cannot move twice in the same turn")
+    void testSecondMoveInSameTurnIsRejected() {
+        Game game = GameFactory.createGame(new String[]{
+            "P P P",
+            "P P P"
+        });
+        Unit unit = game.createUnit("Infantry", "P1", 0, 0);
+
+        boolean firstMove = game.moveUnit(new Position(0, 0), new Position(0, 1));
+        boolean secondMove = game.moveUnit(new Position(0, 1), new Position(0, 2));
+
+        Assertions.assertTrue(firstMove);
+        Assertions.assertFalse(secondMove);
+        Assertions.assertEquals(new Position(0, 1), unit.getPosition());
     }
 
     @Test
