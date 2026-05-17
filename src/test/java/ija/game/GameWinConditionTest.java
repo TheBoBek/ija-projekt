@@ -1,11 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - alegzoo (2026-05-16)
- *   - 2026-05-16: Add victory
- *
- * Popis obsahu:
- * - Zdrojový soubor GameWinConditionTest v balíku ija.game.
- */
+/** Author: xmarina00 */
 package ija.game;
 
 import ija.common.Position;

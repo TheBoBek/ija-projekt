@@ -1,11 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - alegzoo (2026-05-16)
- *   - 2026-05-16: Implement income and factory buying
- *
- * Popis obsahu:
- * - Zdrojový soubor GameEconomyPurchaseTest v balíku ija.game.
- */
+/** Author: xmarina00 */
 package ija.game;
 
 import ija.common.Position;

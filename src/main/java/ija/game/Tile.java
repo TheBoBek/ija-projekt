@@ -1,13 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - TheBoBek (2026-05-02 až 2026-05-17)
- *   - 2026-05-17: Prepare assignment files and simplify engine validation
- *   - 2026-05-07: Extend CombatService + tests + Add factory validation API.
- *   - 2026-05-02: Add task 2, implement Tile data handle and refactor TerrainType and TerrainDef.
- *
- * Popis obsahu:
- * - Zdrojový soubor Tile v balíku ija.game.
- */
+/** Author: xmarina00, xbobkos00 */
 package ija.game;
 
 /**

@@ -1,11 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - alegzoo (2026-05-17)
- *   - 2026-05-17: Add bot + test
- *
- * Popis obsahu:
- * - Zdrojový soubor DummyBotTest v balíku ija.bot.
- */
+/** Author: xmarina00 */
 package ija.bot;
 
 import ija.common.Position;

@@ -1,11 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - alegzoo (2026-05-17)
- *   - 2026-05-17: Add sprite loading library
- *
- * Popis obsahu:
- * - Zdrojový soubor SpriteLibrary v balíku ija.ui.
- */
+/** Author: xmarina00 */
 package ija.ui;
 
 import ija.game.TerrainType;

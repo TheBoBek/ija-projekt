@@ -1,12 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - alegzoo (2026-05-17)
- *   - 2026-05-17: Minimal layout changes + docs + ai_audit
- *   - 2026-05-17: Add game logic + UI
- *
- * Popis obsahu:
- * - Zdrojový soubor GameApp v balíku ija.ui.
- */
+/** Author: xmarina00 */
 package ija.ui;
 
 import com.google.gson.Gson;

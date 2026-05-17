@@ -1,11 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - TheBoBek (2026-05-02)
- *   - 2026-05-02: Add unit load from JSON, Artillery, UnitDamageTable and created tests
- *
- * Popis obsahu:
- * - Zdrojový soubor GameTest v balíku ija.
- */
+/** Author: xmarina00, xbobkos00 */
 package ija;
 
 import ija.common.Position;

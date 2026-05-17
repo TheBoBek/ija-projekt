@@ -1,11 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - alegzoo (2026-05-17)
- *   - 2026-05-17: Add game state snapshot model
- *
- * Popis obsahu:
- * - Zdrojový soubor GameState v balíku ija.game.
- */
+/** Author: xmarina00 */
 package ija.game;
 
 import ija.common.Position;

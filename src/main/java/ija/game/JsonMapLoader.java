@@ -1,13 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - alegzoo (2026-05-16)
- *   - 2026-05-16: Implement json map loader
- * - TheBoBek (2026-05-02)
- *   - 2026-05-02: Add unit load from JSON, Artillery, UnitDamageTable and created tests
- *
- * Popis obsahu:
- * - Zdrojový soubor JsonMapLoader v balíku ija.game.
- */
+/** Author: xmarina00, xbobkos00 */
 package ija.game;
 
 import com.google.gson.Gson;

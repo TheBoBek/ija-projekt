@@ -1,11 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - alegzoo (2026-05-17)
- *   - 2026-05-17: Add command classes
- *
- * Popis obsahu:
- * - Zdrojový soubor PurchaseCommand v balíku ija.command.
- */
+/** Author: xmarina00 */
 package ija.command;
 
 import ija.common.Position;

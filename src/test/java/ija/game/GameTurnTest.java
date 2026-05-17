@@ -1,13 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - alegzoo (2026-05-16)
- *   - 2026-05-16: Implement income and factory buying
- * - TheBoBek (2026-05-11)
- *   - 2026-05-11: Add Turn, money and player logic
- *
- * Popis obsahu:
- * - Zdrojový soubor GameTurnTest v balíku ija.game.
- */
+/** Author: xmarina00, xbobkos00 */
 package ija.game;
 
 import ija.common.Position;

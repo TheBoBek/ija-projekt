@@ -1,12 +1,4 @@
-/**
- * Autoři a změny podle commit historie:
- * - TheBoBek (2026-05-02)
- *   - 2026-05-02: Add unit load from JSON, Artillery, UnitDamageTable and created tests
- *   - 2026-05-02: Add task 2, implement Tile data handle and refactor TerrainType and TerrainDef.
- *
- * Popis obsahu:
- * - Zdrojový soubor Unit v balíku ija.game.
- */
+/** Author: xmarina00, xbobkos00 */
 package ija.game;
 
 import ija.common.Position;
