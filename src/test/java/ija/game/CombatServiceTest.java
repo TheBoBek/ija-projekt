@@ -31,10 +31,7 @@ class CombatServiceTest {
         CombatService combatService = new CombatService(new UnitDamageTable());
         Unit defender = unit(UnitType.TANK, "P2", 0, 1);
 
-        Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> combatService.canAttack(null, defender)
-        );
+        Assertions.assertFalse(combatService.canAttack(null, defender));
     }
 
     @Test
@@ -43,10 +40,7 @@ class CombatServiceTest {
         CombatService combatService = new CombatService(new UnitDamageTable());
         Unit attacker = unit(UnitType.INFANTRY, "P1", 0, 0);
 
-        Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> combatService.canAttack(attacker, null)
-        );
+        Assertions.assertFalse(combatService.canAttack(attacker, null));
     }
 
     @Test
@@ -161,61 +155,6 @@ class CombatServiceTest {
 
         Assertions.assertFalse(combatService.canAttack(attacker, unit(UnitType.TANK, "P2", 0, 1)));
         Assertions.assertFalse(combatService.canAttack(attacker, unit(UnitType.TANK, "P2", 0, 4)));
-    }
-
-    @Test
-    @DisplayName("calculateDamage rejects negative base damage")
-    void testCalculateDamageRejectsNegativeBaseDamage() {
-        CombatService combatService = new CombatService(new UnitDamageTable());
-
-        Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> combatService.calculateDamage(-1, 100, 0)
-        );
-    }
-
-    @Test
-    @DisplayName("calculateDamage rejects attacker hp below zero")
-    void testCalculateDamageRejectsNegativeAttackerHp() {
-        CombatService combatService = new CombatService(new UnitDamageTable());
-
-        Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> combatService.calculateDamage(75, -1, 0)
-        );
-    }
-
-    @Test
-    @DisplayName("calculateDamage rejects attacker hp above one hundred")
-    void testCalculateDamageRejectsAttackerHpAboveMaximum() {
-        CombatService combatService = new CombatService(new UnitDamageTable());
-
-        Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> combatService.calculateDamage(75, 101, 0)
-        );
-    }
-
-    @Test
-    @DisplayName("calculateDamage rejects negative terrain bonus")
-    void testCalculateDamageRejectsNegativeTerrainBonus() {
-        CombatService combatService = new CombatService(new UnitDamageTable());
-
-        Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> combatService.calculateDamage(75, 100, -1)
-        );
-    }
-
-    @Test
-    @DisplayName("calculateDamage rejects terrain bonus above ten")
-    void testCalculateDamageRejectsTerrainBonusAboveMaximum() {
-        CombatService combatService = new CombatService(new UnitDamageTable());
-
-        Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> combatService.calculateDamage(75, 100, 11)
-        );
     }
 
     @Test

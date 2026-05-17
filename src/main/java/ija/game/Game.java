@@ -87,11 +87,8 @@ public class Game implements Observable {
     }
 
     public Unit getUnitAt(Position position) {
-        if (position == null) {
-            throw new IllegalArgumentException("Position must not be null");
-        }
-        if (!isInsideMap(position)) {
-            throw new IllegalArgumentException("Position is outside map: " + position);
+        if (position == null || !isInsideMap(position)) {
+            return null;
         }
 
         for (Unit unit : units) {
@@ -230,7 +227,7 @@ public class Game implements Observable {
     }
 
     public int getIncomeForPlayer(String playerId) {
-        requirePlayerId(playerId);
+        getMutablePlayer(playerId);
         int income = 0;
         for (Tile[] row : map) {
             for (Tile tile : row) {
@@ -391,14 +388,20 @@ public class Game implements Observable {
     }
 
     public boolean canHealUnitOnCurrentTile(Position unitPosition) {
-        Unit unit = getRequiredUnit(unitPosition);
-        Tile tile = getTileAt(unitPosition);
+        Unit unit = getUnitAt(unitPosition);
+        if (unit == null) {
+            return false;
+        }
+        Tile tile = getTileAt(unit.getPosition());
         return BUILDING_SERVICE.canHeal(unit, tile);
     }
 
     public int healUnitOnCurrentTile(Position unitPosition) {
-        Unit unit = getRequiredUnit(unitPosition);
-        Tile tile = getTileAt(unitPosition);
+        Unit unit = getUnitAt(unitPosition);
+        if (unit == null) {
+            return 0;
+        }
+        Tile tile = getTileAt(unit.getPosition());
         return BUILDING_SERVICE.healIfEligible(unit, tile);
     }
 
@@ -445,8 +448,11 @@ public class Game implements Observable {
         if (gameOver) {
             return false;
         }
-        Unit unit = getRequiredUnit(unitPosition);
-        Tile tile = getTileAt(unitPosition);
+        Unit unit = getUnitAt(unitPosition);
+        if (unit == null) {
+            return false;
+        }
+        Tile tile = getTileAt(unit.getPosition());
         return BUILDING_SERVICE.canCapture(unit, tile);
     }
 
@@ -595,13 +601,6 @@ public class Game implements Observable {
             && !occupant.getOwner().equals(movingUnit.getOwner());
     }
 
-    private void requirePlayerId(String playerId) {
-        if (playerId == null || playerId.isBlank()) {
-            throw new IllegalArgumentException("Player id must not be blank");
-        }
-        getMutablePlayer(playerId);
-    }
-
     void setPlayerMoney(String playerId, int money) {
         Player player = getMutablePlayer(playerId);
         player.setMoney(money);
@@ -658,9 +657,6 @@ public class Game implements Observable {
     }
 
     private int calculateRepairCost(UnitType unitType, int repairedHp) {
-        if (unitType == null) {
-            throw new IllegalArgumentException("Unit type must not be null");
-        }
         if (repairedHp <= 0) {
             return 0;
         }

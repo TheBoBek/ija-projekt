@@ -42,19 +42,25 @@ public final class Tile {
     }
 
     public int getCapturePointsRemaining() {
-        requireBuildingTileForCapture();
+        if (!terrainType.isBuilding()) {
+            return 0;
+        }
         return capturePointsRemaining;
     }
 
     public void resetCapturePoints() {
-        requireBuildingTileForCapture();
+        if (!terrainType.isBuilding()) {
+            return;
+        }
         capturePointsRemaining = DEFAULT_CAPTURE_POINTS;
     }
 
     public void reduceCapturePoints(int amount) {
-        requireBuildingTileForCapture();
         if (amount < 0) {
             throw new IllegalArgumentException("Capture reduction amount must not be negative");
+        }
+        if (!terrainType.isBuilding()) {
+            return;
         }
         capturePointsRemaining = Math.max(0, capturePointsRemaining - amount);
     }
@@ -103,12 +109,6 @@ public final class Tile {
             capturePointsRemaining = DEFAULT_CAPTURE_POINTS;
         } else {
             capturePointsRemaining = 0;
-        }
-    }
-
-    private void requireBuildingTileForCapture() {
-        if (!terrainType.isBuilding()) {
-            throw new IllegalArgumentException("Capture state exists only for building tiles");
         }
     }
 

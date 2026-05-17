@@ -189,13 +189,14 @@ public class AdditionalEdgeCasesTest {
     }
 
     @Test
-    @DisplayName("Capture API rejects non-building tiles")
-    void testTileCaptureApiRejectsNonBuildingTiles() {
+    @DisplayName("Capture API returns neutral values for non-building tiles")
+    void testTileCaptureApiReturnsNeutralValuesForNonBuildingTiles() {
         Tile plain = new Tile(TerrainType.PLAIN);
 
-        Assertions.assertThrows(IllegalArgumentException.class, plain::getCapturePointsRemaining);
-        Assertions.assertThrows(IllegalArgumentException.class, plain::resetCapturePoints);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> plain.reduceCapturePoints(1));
+        Assertions.assertEquals(0, plain.getCapturePointsRemaining());
+        plain.resetCapturePoints();
+        plain.reduceCapturePoints(1);
+        Assertions.assertEquals(0, plain.getCapturePointsRemaining());
     }
 
     @Test
@@ -313,19 +314,16 @@ public class AdditionalEdgeCasesTest {
     }
 
     @Test
-    @DisplayName("Game rejects unit lookup with null or outside position")
-    void testGameRejectsInvalidUnitLookup() {
+    @DisplayName("Game returns null for unit lookup with null or outside position")
+    void testGameReturnsNullForInvalidUnitLookup() {
         Game game = GameFactory.createGame(new String[]{
             "P P",
             "P P"
         });
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> game.getUnitAt(null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> game.getUnitAt(new Position(-1, 0)));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> game.getUnitAt(new Position(0, 2)));
+        Assertions.assertNull(game.getUnitAt(null));
+        Assertions.assertNull(game.getUnitAt(new Position(-1, 0)));
+        Assertions.assertNull(game.getUnitAt(new Position(0, 2)));
     }
 
     @Test

@@ -8,7 +8,7 @@ public final class BuildingService {
 
     public boolean isOwnedBy(Tile tile, String owner) {
         if (tile == null) {
-            throw new IllegalArgumentException("Tile must not be null");
+            return false;
         }
         if (owner == null || owner.isBlank()) {
             return false;
@@ -17,11 +17,8 @@ public final class BuildingService {
     }
 
     public boolean canHeal(Unit unit, Tile tile) {
-        if (unit == null) {
-            throw new IllegalArgumentException("Unit must not be null");
-        }
-        if (tile == null) {
-            throw new IllegalArgumentException("Tile must not be null");
+        if (unit == null || tile == null) {
+            return false;
         }
 
         if (!tile.isBuilding()) {
@@ -37,11 +34,8 @@ public final class BuildingService {
     }
 
     public int healIfEligible(Unit unit, Tile tile) {
-        if (unit == null) {
-            throw new IllegalArgumentException("Unit must not be null");
-        }
-        if (tile == null) {
-            throw new IllegalArgumentException("Tile must not be null");
+        if (unit == null || tile == null) {
+            return 0;
         }
         if (!canHeal(unit, tile)) {
             return 0;
@@ -51,17 +45,14 @@ public final class BuildingService {
 
     public boolean isCapturableBuilding(Tile tile) {
         if (tile == null) {
-            throw new IllegalArgumentException("Tile must not be null");
+            return false;
         }
         return tile.isCity() || tile.isFactory() || tile.isHq();
     }
 
     public boolean canCapture(Unit unit, Tile tile) {
-        if (unit == null) {
-            throw new IllegalArgumentException("Unit must not be null");
-        }
-        if (tile == null) {
-            throw new IllegalArgumentException("Tile must not be null");
+        if (unit == null || tile == null) {
+            return false;
         }
         if (!isCapturableBuilding(tile)) {
             return false;
@@ -77,27 +68,21 @@ public final class BuildingService {
 
     public int getCapturePower(Unit unit) {
         if (unit == null) {
-            throw new IllegalArgumentException("Unit must not be null");
+            return 0;
         }
         return unit.getHp() / 10;
     }
 
     public boolean isEnemyHq(Unit unit, Tile tile) {
-        if (unit == null) {
-            throw new IllegalArgumentException("Unit must not be null");
-        }
-        if (tile == null) {
-            throw new IllegalArgumentException("Tile must not be null");
+        if (unit == null || tile == null) {
+            return false;
         }
         return tile.isHq() && !isOwnedBy(tile, unit.getOwner());
     }
 
     public CaptureResult captureIfEligible(Unit unit, Tile tile) {
-        if (unit == null) {
-            throw new IllegalArgumentException("Unit must not be null");
-        }
-        if (tile == null) {
-            throw new IllegalArgumentException("Tile must not be null");
+        if (unit == null || tile == null) {
+            return new CaptureResult(false, 0, 0, 0, false, false);
         }
 
         int before = isCapturableBuilding(tile) ? tile.getCapturePointsRemaining() : 0;

@@ -14,11 +14,8 @@ public final class CombatService {
     }
 
     public boolean canAttack(Unit attacker, Unit defender) {
-        if (attacker == null) {
-            throw new IllegalArgumentException("Attacker must not be null");
-        }
-        if (defender == null) {
-            throw new IllegalArgumentException("Defender must not be null");
+        if (attacker == null || defender == null) {
+            return false;
         }
         if (attacker == defender) {
             return false;
@@ -44,16 +41,6 @@ public final class CombatService {
     }
 
     public int calculateDamage(int baseDamage, int attackerHp, int defenderTerrainBonus) {
-        if (baseDamage < 0) {
-            throw new IllegalArgumentException("Base damage must not be negative");
-        }
-        if (attackerHp < 0 || attackerHp > 100) {
-            throw new IllegalArgumentException("Attacker hp must be between 0 and 100");
-        }
-        if (defenderTerrainBonus < 0 || defenderTerrainBonus > 10) {
-            throw new IllegalArgumentException("Defender terrain bonus must be between 0 and 10");
-        }
-
         return baseDamage * attackerHp * (10 - defenderTerrainBonus) / 1000;
     }
 
@@ -63,14 +50,8 @@ public final class CombatService {
         Unit defender,
         Tile defenderTile
     ) {
-        if (attacker == null) {
-            throw new IllegalArgumentException("Attacker must not be null");
-        }
         if (attackerTile == null) {
             throw new IllegalArgumentException("Attacker tile must not be null");
-        }
-        if (defender == null) {
-            throw new IllegalArgumentException("Defender must not be null");
         }
         if (defenderTile == null) {
             throw new IllegalArgumentException("Defender tile must not be null");

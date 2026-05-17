@@ -1,0 +1,31 @@
+2026-05-17 TheBoBek: On main: codex-pre-pull-2026-05-17
+2026-05-17 TheBoBek: index on main: 50a82c0 Add Turn, money and player logic
+2026-05-17 TheBoBek: untracked files on main: 50a82c0 Add Turn, money and player logic
+2026-05-17 alegzoo: Add game logic + UI
+2026-05-17 alegzoo: Add bot + test
+2026-05-17 alegzoo: Add command classes + test
+2026-05-17 alegzoo: Add command classes
+2026-05-17 alegzoo: Add capture command
+2026-05-17 alegzoo: Add attack command
+2026-05-17 alegzoo: Add sprite loading library
+2026-05-17 alegzoo: Add unit factory classes
+2026-05-17 alegzoo: Add game state snapshot model
+2026-05-16 alegzoo: Add game event types
+2026-05-16 alegzoo: Add victory
+2026-05-16 alegzoo: Implement income and factory buying
+2026-05-16 alegzoo: Add example json maps
+2026-05-16 alegzoo: Implement json map loader
+2026-05-16 alegzoo: Maven project setup
+2026-05-16 alegzoo: Add new sprites
+2026-05-15 alegzoo: Updat terrain types resolutions + add water
+2026-05-15 alegzoo: Add other terrain types and objects
+2026-05-14 alegzoo: Add terrain graphics for the forest, grass, mountain
+2026-05-11 TheBoBek: Add Turn, money and player logic
+2026-05-08 TheBoBek: Remove local-only files from repository
+2026-05-07 TheBoBek: Extend CombatService + tests + Add factory validation API.
+2026-05-07 TheBoBek: Add CombatService + tests
+2026-05-07 TheBoBek: Add BuildingService + tests
+2026-05-07 TheBoBek: Add CombatResult + tests
+2026-05-02 TheBoBek: Add unit load from JSON, Artillery, UnitDamageTable and created tests
+2026-05-02 TheBoBek: Add task 2, implement Tile data handle and refactor TerrainType and TerrainDef.
+2026-05-01 TheBoBek: Bootstrap project repository

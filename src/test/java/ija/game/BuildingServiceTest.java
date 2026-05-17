@@ -28,10 +28,9 @@ class BuildingServiceTest {
     }
 
     @Test
-    @DisplayName("Ownership helper rejects null tile")
-    void testIsOwnedByRejectsNullTile() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.isOwnedBy(null, "P1"));
+    @DisplayName("Ownership helper returns false for null tile")
+    void testIsOwnedByReturnsFalseForNullTile() {
+        Assertions.assertFalse(buildingService.isOwnedBy(null, "P1"));
     }
 
     @Test
@@ -74,19 +73,15 @@ class BuildingServiceTest {
     }
 
     @Test
-    @DisplayName("Healing methods reject null arguments")
-    void testHealingRejectsNullArguments() {
+    @DisplayName("Healing methods return soft values for null arguments")
+    void testHealingReturnsSoftValuesForNullArguments() {
         Unit unit = damagedUnit("P1", 20);
         Tile city = new Tile(TerrainType.CITY, "P1");
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.canHeal(null, city));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.canHeal(unit, null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.healIfEligible(null, city));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.healIfEligible(unit, null));
+        Assertions.assertFalse(buildingService.canHeal(null, city));
+        Assertions.assertFalse(buildingService.canHeal(unit, null));
+        Assertions.assertEquals(0, buildingService.healIfEligible(null, city));
+        Assertions.assertEquals(0, buildingService.healIfEligible(unit, null));
     }
 
     @Test
@@ -180,25 +175,21 @@ class BuildingServiceTest {
     }
 
     @Test
-    @DisplayName("Game healing hooks reject null position")
-    void testGameHealingRejectsNullPosition() {
+    @DisplayName("Game healing hooks return soft values for null position")
+    void testGameHealingReturnsSoftValuesForNullPosition() {
         Game game = gameWithSingleCityOwnedBy("P1");
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> game.canHealUnitOnCurrentTile(null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> game.healUnitOnCurrentTile(null));
+        Assertions.assertFalse(game.canHealUnitOnCurrentTile(null));
+        Assertions.assertEquals(0, game.healUnitOnCurrentTile(null));
     }
 
     @Test
-    @DisplayName("Game healing hooks reject position without unit")
-    void testGameHealingRejectsMissingUnit() {
+    @DisplayName("Game healing hooks return soft values for position without unit")
+    void testGameHealingReturnsSoftValuesForMissingUnit() {
         Game game = gameWithSingleCityOwnedBy("P1");
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> game.canHealUnitOnCurrentTile(new Position(0, 0)));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> game.healUnitOnCurrentTile(new Position(0, 0)));
+        Assertions.assertFalse(game.canHealUnitOnCurrentTile(new Position(0, 0)));
+        Assertions.assertEquals(0, game.healUnitOnCurrentTile(new Position(0, 0)));
     }
 
     @Test
@@ -214,27 +205,20 @@ class BuildingServiceTest {
     }
 
     @Test
-    @DisplayName("Capture helper methods reject null arguments")
-    void testCaptureRejectsNullArguments() {
+    @DisplayName("Capture helper methods return soft values for null arguments")
+    void testCaptureReturnsSoftValuesForNullArguments() {
         Unit infantry = new Unit(UnitType.INFANTRY, "P1", new Position(0, 0));
         Tile city = new Tile(TerrainType.CITY, "P2");
+        CaptureResult noCapture = new CaptureResult(false, 0, 0, 0, false, false);
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.isCapturableBuilding(null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.canCapture(null, city));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.canCapture(infantry, null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.getCapturePower(null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.isEnemyHq(null, city));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.isEnemyHq(infantry, null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.captureIfEligible(null, city));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> buildingService.captureIfEligible(infantry, null));
+        Assertions.assertFalse(buildingService.isCapturableBuilding(null));
+        Assertions.assertFalse(buildingService.canCapture(null, city));
+        Assertions.assertFalse(buildingService.canCapture(infantry, null));
+        Assertions.assertEquals(0, buildingService.getCapturePower(null));
+        Assertions.assertFalse(buildingService.isEnemyHq(null, city));
+        Assertions.assertFalse(buildingService.isEnemyHq(infantry, null));
+        Assertions.assertEquals(noCapture, buildingService.captureIfEligible(null, city));
+        Assertions.assertEquals(noCapture, buildingService.captureIfEligible(infantry, null));
     }
 
     @Test
@@ -397,16 +381,14 @@ class BuildingServiceTest {
     }
 
     @Test
-    @DisplayName("Game capture wrappers reject null position and missing unit")
-    void testGameCaptureRejectsInvalidPositions() {
+    @DisplayName("Game capture checks are soft but capture action still rejects invalid positions")
+    void testGameCaptureInvalidPositions() {
         Game game = gameWithSingleOwnedBuilding(TerrainType.CITY, "P2");
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> game.canCaptureBuilding(null));
+        Assertions.assertFalse(game.canCaptureBuilding(null));
         Assertions.assertThrows(IllegalArgumentException.class,
             () -> game.captureBuilding(null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-            () -> game.canCaptureBuilding(new Position(0, 0)));
+        Assertions.assertFalse(game.canCaptureBuilding(new Position(0, 0)));
         Assertions.assertThrows(IllegalArgumentException.class,
             () -> game.captureBuilding(new Position(0, 0)));
     }

@@ -58,10 +58,6 @@ public final class GameFactory {
     }
 
     private static Game createGameFromLoadedMap(JsonMapLoader.LoadedMapData loadedMap) {
-        if (loadedMap == null) {
-            throw new IllegalArgumentException("Loaded map data must not be null");
-        }
-
         Game game = createGameFromTiles(loadedMap.tiles());
         initializeUnits(game, loadedMap);
         initializePlayerState(game, loadedMap);
@@ -74,27 +70,18 @@ public final class GameFactory {
     }
 
     private static void initializeUnits(Game game, JsonMapLoader.LoadedMapData loadedMap) {
-        if (game == null || loadedMap == null) {
-            throw new IllegalArgumentException("Game and loaded map data must not be null");
-        }
         for (JsonMapLoader.ScenarioUnitData unit : loadedMap.units()) {
             game.createUnit(unit.type(), unit.owner(), unit.position().row(), unit.position().col());
         }
     }
 
     private static void initializePlayerState(Game game, JsonMapLoader.LoadedMapData loadedMap) {
-        if (game == null || loadedMap == null) {
-            throw new IllegalArgumentException("Game and loaded map data must not be null");
-        }
         for (JsonMapLoader.ScenarioPlayerState playerState : loadedMap.players()) {
             game.setPlayerMoney(playerState.id(), playerState.money());
         }
     }
 
     private static void initializeTurn(Game game, JsonMapLoader.LoadedMapData loadedMap) {
-        if (game == null || loadedMap == null) {
-            throw new IllegalArgumentException("Game and loaded map data must not be null");
-        }
         JsonMapLoader.ScenarioTurnState turn = loadedMap.turn();
         if (turn == null) {
             return;
