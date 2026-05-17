@@ -1,6 +1,7 @@
-2026-05-17 TheBoBek: On main: codex-pre-pull-2026-05-17
-2026-05-17 TheBoBek: index on main: 50a82c0 Add Turn, money and player logic
-2026-05-17 TheBoBek: untracked files on main: 50a82c0 Add Turn, money and player logic
+2026-05-17 alegzoo: Minimal layout changes + docs + ai_audit
+2026-05-17 alegzoo: WIP on main: 312ad50 Add game logic + UI
+2026-05-17 alegzoo: index on main: 312ad50 Add game logic + UI
+2026-05-17 TheBoBek: Prepare assignment files and simplify engine validation
 2026-05-17 alegzoo: Add game logic + UI
 2026-05-17 alegzoo: Add bot + test
 2026-05-17 alegzoo: Add command classes + test
