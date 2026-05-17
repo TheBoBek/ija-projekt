@@ -1,4 +1,4 @@
-# IJA 2025/26 Project
+# IJA 2025/26 Project – Tým xmarina00
 
 Course project inspired by Advance Wars.
 
@@ -54,3 +54,4 @@ Course project inspired by Advance Wars.
 - The project is checked with `mvn test`.
 - Automated tests cover movement, combat, economy, replay state, bot behavior, and integration.
 - Small manual gameplay smoke testing in the team focused on launching the JavaFX game, loading a bundled scenario, selecting units, checking movement highlights, trying move and action menus, ending turns, trying basic factory buying, and briefly checking bot play and `Bot vs. Bot`.
+

@@ -111,12 +111,10 @@ public class GameApp extends Application {
     private Button replayLiveButton;
     private Button mapOneButton;
     private Button mapTwoButton;
-    private Button terminalToggleButton;
     private boolean replayMode;
     private int replayIndex;
     private Timeline botVsBotTimeline;
     private boolean gameOverAnnounced;
-    private boolean terminalVisible = true;
 
     @Override
     public void start(Stage stage) {
@@ -124,7 +122,6 @@ public class GameApp extends Application {
 
         rootLayout = new BorderPane();
         rootLayout.setPadding(new Insets(12));
-        rootLayout.setTop(buildTopBar());
         rootLayout.setCenter(buildBoard());
         rootLayout.setRight(buildTerminalPanel());
 
@@ -193,30 +190,64 @@ public class GameApp extends Application {
         replayLiveButton = new Button("Live Mode");
         replayLiveButton.setOnAction(event -> switchReplayToLive());
 
-        terminalToggleButton = new Button("Hide Terminal");
-        terminalToggleButton.setOnAction(event -> toggleTerminalVisibility());
+        statusLabel.setWrapText(true);
+        statusLabel.setStyle("-fx-text-fill: #f3f4f6;");
+        turnLabel.setStyle("-fx-text-fill: #f3f4f6;");
+        fundsLabel.setStyle("-fx-text-fill: #f3f4f6;");
 
-        HBox bar = new HBox(
-            12,
-            turnLabel,
-            fundsLabel,
-            endTurnButton,
+        HBox hudBar = new HBox(12, turnLabel, fundsLabel);
+        hudBar.setAlignment(Pos.CENTER_LEFT);
+
+        HBox endTurnRow = createEqualWidthRow(
+            endTurnButton
+        );
+        HBox saveLoadRow = createEqualWidthRow(
             saveLogButton,
-            loadLogButton,
-            botTurnButton,
+            loadLogButton
+        );
+        HBox botVsBotRow = createEqualWidthRow(
             botVsBotStartButton,
-            botVsBotStopButton,
+            botVsBotStopButton
+        );
+        HBox scenarioRow = createEqualWidthRow(
             mapOneButton,
-            mapTwoButton,
+            mapTwoButton
+        );
+        HBox replayRow = createEqualWidthRow(
             replayBackButton,
             replayForwardButton,
-            replayLiveButton,
-            terminalToggleButton,
-            statusLabel
+            replayLiveButton
         );
-        bar.setAlignment(Pos.CENTER_LEFT);
-        bar.setPadding(new Insets(4, 0, 10, 0));
-        return bar;
+
+        botTurnButton.setManaged(false);
+        botTurnButton.setVisible(false);
+
+        VBox panel = new VBox(
+            8,
+            statusLabel,
+            hudBar,
+            endTurnRow,
+            saveLoadRow,
+            botVsBotRow,
+            scenarioRow,
+            replayRow
+        );
+        panel.setPadding(new Insets(0, 0, 4, 0));
+        return panel;
+    }
+
+    private HBox createEqualWidthRow(Button... buttons) {
+        HBox row = new HBox(8);
+        row.setAlignment(Pos.CENTER_LEFT);
+        for (Button button : buttons) {
+            if (button == null) {
+                continue;
+            }
+            button.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(button, Priority.ALWAYS);
+            row.getChildren().add(button);
+        }
+        return row;
     }
 
     private Node buildBoard() {
@@ -260,15 +291,7 @@ public class GameApp extends Application {
         );
         VBox.setVgrow(eventLog, Priority.ALWAYS);
 
-        Button closeTerminalButton = new Button("Close");
-        closeTerminalButton.setOnAction(event -> setTerminalVisible(false));
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox header = new HBox(8, spacer, closeTerminalButton);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        terminalPanel = new VBox(8, header, eventLog);
+        terminalPanel = new VBox(8, buildTopBar(), eventLog);
         terminalPanel.setPadding(new Insets(8));
         terminalPanel.setPrefWidth(360);
         terminalPanel.setMinWidth(300);
@@ -1169,21 +1192,6 @@ public class GameApp extends Application {
 
     private void appendLog(String message) {
         eventLog.appendText(message + System.lineSeparator());
-    }
-
-    private void toggleTerminalVisibility() {
-        setTerminalVisible(!terminalVisible);
-    }
-
-    private void setTerminalVisible(boolean visible) {
-        terminalVisible = visible;
-        if (rootLayout != null) {
-            rootLayout.setRight(visible ? terminalPanel : null);
-        }
-        if (terminalToggleButton != null) {
-            terminalToggleButton.setText(visible ? "Hide Terminal" : "Show Terminal");
-        }
-        updateCellSize();
     }
 
     private String describeUnitAt(Position position) {
